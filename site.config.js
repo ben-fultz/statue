@@ -71,6 +71,12 @@ export const siteConfig = {
     keywords: ["static site generator", "markdown", "sveltekit", "ssg"],
     ogImage: "/images/og-image.png",
     twitterCard: "summary_large_image"
+  },
+
+  // Authentication settings
+  auth: {
+    sourceUrl: "https://api.example.com/auth",
+    destinationUrl: "/dashboard"
   }
 };
 

@@ -274,7 +274,11 @@ const processTemplateVariables = (content) => {
     'date.now': new Date().toLocaleDateString('en-US'),
     'date.year': new Date().getFullYear().toString(),
     'date.month': new Date().toLocaleDateString('en-US', { month: 'long' }),
-    'date.day': new Date().getDate().toString()
+    'date.day': new Date().getDate().toString(),
+
+    // Auth variables
+    'auth.sourceUrl': siteConfig.auth?.sourceUrl,
+    'auth.destinationUrl': siteConfig.auth?.destinationUrl
   };
   
   // Replace template variables

@@ -1,4 +1,5 @@
-<script>
+<script lang="ts">
+  import Auth from '$lib/components/Auth.svelte';
   import Footer from '$lib/components/Footer.svelte';
   import { page } from '$app/stores';
   
@@ -9,6 +10,7 @@
 </script>
 
 <main>
+  <Auth />
   <slot />
 </main>
 
