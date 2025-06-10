@@ -1,6 +1,7 @@
 ---
 title: Getting Started
 description: Learn how to get started with our platform
+date: '2025-06-09'
 ---
 
 # Getting Started
@@ -42,4 +43,4 @@ Start the development server with:
 npm run dev
 ```
 
-Your site should now be running at `http://localhost:5173`. 
+Your site should now be running at `http://localhost:5173`.

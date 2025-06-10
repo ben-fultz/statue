@@ -1,6 +1,9 @@
 ---
 title: TRUTH - A New Paradigm in AI Philosophy
-description: Exploring how TRUTH is revolutionizing our approach to philosophical questions through advanced language modeling
+description: >-
+  Exploring how TRUTH is revolutionizing our approach to philosophical questions
+  through advanced language modeling
+date: '2025-06-09'
 ---
 
 Since time immemorial, man has pondered these question. Many a great thinker has stared into the abyss and lost themselves in an episemic spiral. Questions are answered by bigger, harder questions.
@@ -23,4 +26,4 @@ Take, for instance, the classic philosophical conundrum: "If a tree falls in a f
 
 # The Future of Knowledge
 
-TRUTH represents more than a technological breakthrough. It is a bridge between language modeling and philosophical insight. As we continue to develop and refine TRUTH, we are not just making incremental improvements on questionable benchmarks - we are pushing the boundary of technology towards a future where any philosphical quandary has a quick, computationally efficient answer. 
+TRUTH represents more than a technological breakthrough. It is a bridge between language modeling and philosophical insight. As we continue to develop and refine TRUTH, we are not just making incremental improvements on questionable benchmarks - we are pushing the boundary of technology towards a future where any philosphical quandary has a quick, computationally efficient answer.

@@ -50,18 +50,66 @@ const scanContentDirectory = () => {
         // Add markdown files to the list
         const slug = entry.replace('.md', '');
         const url = relativePath 
-          ? `/${relativePath}/${slug}`.replace(/\\/g, '/') 
+          ? `/${relativePath}/${slug}`.replace(/\\/g, '/') // Ensure forward slashes for URL
           : `/${slug}`;
           
-        const content = fs.readFileSync(fullPath, 'utf-8');
-        const { data, content: markdownContent } = matter(content);
+        const fileContentString = fs.readFileSync(fullPath, 'utf-8'); // Read raw content
+        const { data, content: markdownContentBody } = matter(fileContentString); // Parse it
+
+        let dateValue = data.date; // This is what's in the file frontmatter
+        let writeDateToFile = false;
+
+        if (!dateValue) { // Date is missing in frontmatter
+            const now = new Date();
+            // For in-memory, use a Date object representing local midnight
+            dateValue = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            // For writing to file, format as YYYY-MM-DD string
+            const year = dateValue.getFullYear();
+            const month = (dateValue.getMonth() + 1).toString().padStart(2, '0');
+            const day = dateValue.getDate().toString().padStart(2, '0');
+            const dateStringForFile = `${year}-${month}-${day}`;
+
+            data.date = dateStringForFile; // Update the data object that will be stringified
+            writeDateToFile = true;
+
+        } else if (typeof dateValue === 'string') {
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) { // YYYY-MM-DD string
+                const parts = dateValue.split('-');
+                dateValue = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+            } else { // Other date string (e.g., full ISO)
+                dateValue = new Date(dateValue);
+            }
+        } else if (dateValue instanceof Date) { // Already a Date object (e.g., gray-matter parsed full ISO)
+            if (dateValue.getUTCHours() === 0 &&
+                dateValue.getUTCMinutes() === 0 &&
+                dateValue.getUTCSeconds() === 0 &&
+                dateValue.getUTCMilliseconds() === 0 &&
+                dateValue.toISOString().endsWith('00:00:00.000Z')) { // Check if it's UTC midnight
+                // Convert to local midnight
+                dateValue = new Date(dateValue.getUTCFullYear(), dateValue.getUTCMonth(), dateValue.getUTCDate());
+            }
+        }
+        // dateValue is now a JS Date object, or potentially something else if input was invalid
+
+        if (writeDateToFile) {
+            try {
+                const newFileContent = matter.stringify(markdownContentBody, data);
+                fs.writeFileSync(fullPath, newFileContent, 'utf-8');
+                console.log(`[INFO] ContentProcessor: Added date '${data.date}' to frontmatter of ${entryRelativePath}`);
+            } catch (e) {
+                console.error(`[ERROR] ContentProcessor: Failed to write updated date to ${entryRelativePath}:`, e);
+                // If write fails, dateValue still holds the new date for current processing,
+                // but it won't be persisted in the file for next time.
+            }
+        }
         
         // Process template variables (both in markdown content and metadata)
-        const processedMarkdownContent = processTemplateVariables(markdownContent);
+        // markdownContentBody is the original body, data contains potentially new date string
+        const processedMarkdownContent = processTemplateVariables(markdownContentBody);
         const processedMetadata = {};
         
-        // Process string values in metadata through template processing
-        for (const [key, value] of Object.entries(data)) {
+        for (const [key, value] of Object.entries(data)) { // Use 'data' which contains the new date string if added
           if (typeof value === 'string') {
             processedMetadata[key] = processTemplateVariables(value);
           } else {
@@ -69,13 +117,12 @@ const scanContentDirectory = () => {
           }
         }
         
-        // Add default values and process them through template processing
         const finalMetadata = {
           title: processedMetadata.title || formatTitle(slug),
           description: processedMetadata.description || '',
-          date: processedMetadata.date || null,
           author: processedMetadata.author || null,
-          ...processedMetadata
+          ...processedMetadata, // This includes data.date as a string if it was set
+          date: dateValue // THIS IS THE JS DATE OBJECT for use in application logic - MUST BE LAST
         };
         
         // Parse markdown to HTML and then remove the first h1 heading

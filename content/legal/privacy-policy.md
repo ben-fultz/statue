@@ -1,6 +1,7 @@
 ---
 title: Privacy Policy
-description: Privacy Policy for {{site.name}}
+description: 'Privacy Policy for {{site.name}}'
+date: '2025-06-09'
 ---
 
 # Privacy Policy
@@ -61,4 +62,4 @@ page to opt-out of the sale or sharing of your personal information.
 If you have any questions or concerns about this Privacy Policy, please contact us:
 
 - Email: [{{contact.privacyEmail}}](mailto:{{contact.privacyEmail}})
-- Address: {{contact.address.full}} 
+- Address: {{contact.address.full}}
