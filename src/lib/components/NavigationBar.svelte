@@ -1,13 +1,29 @@
 <script>
+  import Search from './Search.svelte';
+  
   export let navbarItems = [];
   export let activePath = '';
   
   let isMenuOpen = false;
+  let searchComponent;
   
   function toggleMenu() {
     isMenuOpen = !isMenuOpen;
   }
+  
+  // Keyboard shortcut for search
+  function handleKeydown(event) {
+    // Ctrl/Cmd + K to focus search
+    if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+      event.preventDefault();
+      if (searchComponent) {
+        searchComponent.focus();
+      }
+    }
+  }
 </script>
+
+<svelte:window on:keydown={handleKeydown} />
 
 <nav class="bg-black text-white border-b border-gray-800 shadow-lg fixed w-full top-0 z-50">
   <div class="container mx-auto px-4">
@@ -26,6 +42,11 @@
             <span class="text-green-500">Statue</span>SSG
           </span>
         </a>
+      </div>
+      
+      <!-- Search Component -->
+      <div class="hidden md:block flex-1 max-w-md mx-8">
+        <Search bind:this={searchComponent} />
       </div>
       
       <!-- Desktop Menu -->
@@ -82,6 +103,10 @@
   {#if isMenuOpen}
     <div class="md:hidden bg-gray-900 border-t border-gray-800">
       <div class="px-2 pt-2 pb-3 space-y-1">
+        <!-- Mobile Search -->
+        <div class="px-3 py-2">
+          <Search placeholder="Search..." />
+        </div>
         <a 
           href="/" 
           class="block px-3 py-2 rounded-md text-base font-medium {activePath === '/' ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'}"

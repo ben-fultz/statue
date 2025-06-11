@@ -23,7 +23,7 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
-		"postbuild": "node scripts/generate-seo-files.js",
+		"postbuild": "node scripts/generate-seo-files.js && node scripts/generate-search-index.js",
 		"preview": "vite preview",
 		"prepublishOnly": "npm run build",
 		"setup": "node postinstall.js",
