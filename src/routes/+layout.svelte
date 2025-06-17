@@ -13,11 +13,11 @@
   $: themeColors = currentTheme.colors;
 </script>
 
-<main>
+<main class="{themeColors.background} min-h-screen">
   <slot />
 </main>
 
-<Footer directories={globalDirectories} {currentPath} />
+<Footer directories={globalDirectories} {currentPath} {themeColors} />
 
 <style>
   :global(body) {
