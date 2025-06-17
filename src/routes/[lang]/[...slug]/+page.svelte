@@ -9,8 +9,10 @@
   // Show content if not having error (notFound: true) 
   $: content = data.content;
   $: directories = data.directories;
+  // $: lang = data.lang; // lang is now available from data if needed
   
   // Active URL for highlighting (for navigation bar)
+  // The URL will now include the language, e.g., /en/blog/post
   $: activePath = $page.url.pathname;
   
   // Page title
@@ -18,17 +20,21 @@
   $: description = content?.metadata?.description;
   
   // Create back link
-  $: backLink = content ? getBackLink(content.directory) : '/';
+  // The backlink should also be language-aware if it points to internal dynamic routes.
+  // If getBackLink generates URLs like `/${directory}`, they will be redirected by hooks.server.js
+  // to `/${lang}/${directory}` if `directory` is not a language code.
+  $: backLink = content ? getBackLink(content.directory, data.lang) : `/${data.lang || 'en'}`;
   $: backLinkText = content ? getBackLinkText(content.directory) : 'Home';
   
   // Helper functions for back link
-  function getBackLink(directory) {
-    if (directory === 'root') return '/';
-    return `/${directory}`;
+  function getBackLink(directory, lang) {
+    const langPrefix = `/${lang || 'en'}`;
+    if (directory === 'root' || directory === '') return langPrefix;
+    return `${langPrefix}/${directory}`;
   }
   
   function getBackLinkText(directory) {
-    if (directory === 'root') return 'Home';
+    if (directory === 'root' || directory === '') return 'Home';
     return directory.charAt(0).toUpperCase() + directory.slice(1);
   }
 </script>
@@ -61,7 +67,7 @@
           
           {#if content.metadata.date}
             <div class="text-gray-400 mt-4">
-              Published: {new Date(content.metadata.date).toLocaleDateString('en-US', {
+              Published: {new Date(content.metadata.date).toLocaleDateString(data.lang || 'en-US', { // Use page lang for date formatting
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
@@ -126,4 +132,4 @@
   /* Nested styles */
   :global(main.prose > div > ul > li > *), :global(.prose ul > li > *) { margin-top: 0.25rem; margin-bottom: 0.25rem; }
   :global(main.prose > div > ol > li > *), :global(.prose ol > li > *) { margin-top: 0.25rem; margin-bottom: 0.25rem; }
-</style> 
+</style>

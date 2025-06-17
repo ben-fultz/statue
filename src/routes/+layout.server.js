@@ -1,7 +1,7 @@
 import { getContentDirectories, getContentByDirectory } from '$lib/cms/content-processor';
 
 /** @type {import('./$types').LayoutServerLoad} */
-export function load() {
+export function load({ locals }) {
   // Get content directories
   const directories = getContentDirectories();
 
@@ -24,6 +24,7 @@ export function load() {
   });
   
   return {
+    lang: locals.lang,
     globalDirectories: enhancedDirectories
   };
 } 

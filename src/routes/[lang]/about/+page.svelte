@@ -1,17 +1,30 @@
 <script>
   import NavigationBar from '$lib/components/NavigationBar.svelte';
+  import { page } from '$app/stores'; // Used for activePath
   
   export let data;
   
   $: directories = data.directories;
+  $: lang = data.lang; // Current language from server load
+
+  // Active path for navigation bar, will include language e.g. /en/about
+  $: activePath = $page.url.pathname;
+
+  // Helper to prefix paths with current language
+  function langLink(path) {
+    if (path.startsWith('/')) {
+      return `/${lang}${path}`;
+    }
+    return `/${lang}/${path}`;
+  }
 </script>
 
 <svelte:head>
-  <title>About Us | Statue SSG</title>
-  <meta name="description" content="Learn about the team behind Statue SSG, our mission and values." />
+  <title>About Us | Statue SSG ({lang.toUpperCase()})</title>
+  <meta name="description" content="Learn about the team behind Statue SSG, our mission and values, in {lang.toUpperCase()}." />
 </svelte:head>
 
-<NavigationBar navbarItems={directories} activePath="/about" />
+<NavigationBar navbarItems={directories} {activePath} />
 
 <div class="bg-black text-white min-h-screen">
   <!-- Hero Section -->
@@ -111,10 +124,10 @@
           Join the growing community of creators using Statue SSG
         </p>
         <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-          <a href="/" class="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-3 rounded-lg transition-all">
+          <a href={langLink('/')} class="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-3 rounded-lg transition-all">
             Explore Features
           </a>
-          <a href="/docs" class="bg-transparent border border-green-500 hover:bg-green-500/20 text-white font-bold px-6 py-3 rounded-lg transition-all">
+          <a href={langLink('/docs')} class="bg-transparent border border-green-500 hover:bg-green-500/20 text-white font-bold px-6 py-3 rounded-lg transition-all">
             Read Documentation
           </a>
         </div>
@@ -125,4 +138,4 @@
 
 <style>
   /* Page specific styles can go here */
-</style> 
+</style>

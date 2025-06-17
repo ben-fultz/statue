@@ -1,51 +1,66 @@
 <script>
   import NavigationBar from '$lib/components/NavigationBar.svelte';
+  import { page } from '$app/stores'; // To get current lang if needed from URL, or use data.lang
   
   // Loaded content
   export let data;
   
-  $: directories = data.directories;
-  $: directoryContent = data.directoryContent;
-  $: currentDirectory = data.currentDirectory;
-  $: subDirectories = data.subDirectories;
+  $: directories = data.directories; // Global nav
+  $: directoryContent = data.directoryContent; // Content for this dir and subdirs, lang filtered
+  $: currentDirectory = data.currentDirectory; // Info about current dir (e.g., 'blog')
+  $: subDirectories = data.subDirectories; // Subdirs of current dir, lang filtered
+  $: lang = data.lang; // Current language
+
+  // Active path for navigation, will include language prefix e.g. /en/blog
+  $: activePath = $page.url.pathname;
   
-  // Filter contents only in the current directory
-  // Not contents in subdirectories
+  // Filter contents only in the current directory (not in subdirectories)
   $: currentDirContent = directoryContent.filter(page => {
-    // Exactly the contents in this directory
-    // E.g.: blog/post.md is in blog/ directory
-    // But blog/category/post.md is not in blog/ directory
+    // page.directory is relative to the language folder.
+    // currentDirectory.name is just the directory name like 'blog'.
     return page.directory === currentDirectory.name;
   });
   
-  // Get all contents in subdirectories
+  // Get all contents in subdirectories of the current directory
   $: subDirContent = directoryContent.filter(page => {
-    // Contents in directories under this directory
     return page.directory !== currentDirectory.name && 
            page.directory.startsWith(currentDirectory.name + '/');
   });
+
+  // Make subdir URLs lang-prefixed
+  $: processedSubDirectories = subDirectories.map(sd => ({
+    ...sd,
+    url: `/${lang}${sd.url}` // sd.url is like /blog/category, needs lang prefix
+  }));
+
+  // Make page URLs lang-prefixed for links
+  function getPageDisplayUrl(pageUrl) {
+    // page.url is already /directory/slug (no lang)
+    return `/${lang}${pageUrl}`;
+  }
+
 </script>
 
 <svelte:head>
-  <title>{currentDirectory.title}</title>
-  <meta name="description" content="{currentDirectory.title} page - Created by Statue SSG" />
+  <title>{currentDirectory.title} ({lang.toUpperCase()})</title>
+  <meta name="description" content="{currentDirectory.title} page in {lang.toUpperCase()} - Created by Statue SSG" />
 </svelte:head>
 
-<NavigationBar navbarItems={directories} activePath={currentDirectory.url} />
+<NavigationBar navbarItems={directories} {activePath} />
 
 <div class="bg-black text-white min-h-screen">
   <div class="container mx-auto px-4 py-16">
     <div class="max-w-5xl mx-auto">
       <h1 class="text-4xl font-bold mb-10 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
-        {currentDirectory.title}
+        {currentDirectory.title} <span class="text-2xl text-gray-400">({lang.toUpperCase()})</span>
       </h1>
       
       <!-- Subdirectories -->
-      {#if subDirectories && subDirectories.length > 0}
+      {#if processedSubDirectories && processedSubDirectories.length > 0}
         <div class="mb-16">
           <h2 class="text-2xl font-bold mb-6 text-white">Subcategories</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {#each subDirectories as subdir}
+            {#each processedSubDirectories as subdir}
               <div class="bg-gray-800 border border-gray-700 p-6 rounded-xl hover:border-green-500 transition-all duration-300 hover:shadow-[0_0_15px_rgba(34,197,94,0.3)]">
                 <a href={subdir.url} class="block">
                   <h3 class="font-bold text-xl text-white">{subdir.title}</h3>
@@ -59,16 +74,17 @@
       <!-- Contents in this directory -->
       {#if currentDirContent && currentDirContent.length > 0}
         <div class="mb-16">
+          <h2 class="text-2xl font-bold mb-6 text-white">Pages in this section</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             {#each currentDirContent as page}
-              <a href={page.url} class="block bg-gray-800 border border-gray-700 p-6 rounded-xl hover:border-green-500 transition-all duration-300 hover:shadow-[0_0_15px_rgba(34,197,94,0.3)]">
+              <a href={getPageDisplayUrl(page.url)} class="block bg-gray-800 border border-gray-700 p-6 rounded-xl hover:border-green-500 transition-all duration-300 hover:shadow-[0_0_15px_rgba(34,197,94,0.3)]">
                 <h3 class="font-bold text-xl text-white mb-2">{page.metadata.title}</h3>
                 {#if page.metadata.description}
                   <p class="text-gray-400 mt-2">{page.metadata.description}</p>
                 {/if}
                 {#if page.metadata.date}
                   <p class="text-gray-500 text-sm mt-2">
-                    {new Date(page.metadata.date).toLocaleDateString('en-US', {
+                    {new Date(page.metadata.date).toLocaleDateString(lang || 'en-US', { // Use page lang
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric'
@@ -93,10 +109,10 @@
           <h2 class="text-2xl font-bold mb-6 text-white">Contents in Subdirectories</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             {#each subDirContent as page}
-              <a href={page.url} class="block bg-gray-800 border border-gray-700 p-6 rounded-xl hover:border-green-500 transition-all duration-300 hover:shadow-[0_0_15px_rgba(34,197,94,0.3)]">
+              <a href={getPageDisplayUrl(page.url)} class="block bg-gray-800 border border-gray-700 p-6 rounded-xl hover:border-green-500 transition-all duration-300 hover:shadow-[0_0_15px_rgba(34,197,94,0.3)]">
                 <h3 class="font-bold text-xl text-white mb-2">{page.metadata.title}</h3>
                 <p class="text-green-400 text-sm mb-2">
-                  Directory: {page.directory}
+                  In: {page.directory} (Lang: {page.lang})
                 </p>
                 {#if page.metadata.description}
                   <p class="text-gray-400 mt-2">{page.metadata.description}</p>
@@ -113,9 +129,9 @@
         </div>
       {/if}
       
-      {#if !currentDirContent.length && !subDirContent.length}
+      {#if !currentDirContent.length && !subDirContent.length && !processedSubDirectories.length}
         <div class="bg-gray-800 border border-gray-700 p-8 rounded-xl text-center">
-          <p class="text-gray-400">No content found in this directory.</p>
+          <p class="text-gray-400">No content or subcategories found in this section for language '{lang.toUpperCase()}'.</p>
         </div>
       {/if}
     </div>
@@ -124,4 +140,4 @@
 
 <style>
   /* Page specific styles can go here */
-</style> 
+</style>

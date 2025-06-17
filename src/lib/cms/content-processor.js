@@ -26,41 +26,41 @@ const removeFirstH1 = (html) => {
 
 // Scans all markdown files and folders in the content directory
 const scanContentDirectory = () => {
-  const contentPath = path.resolve('content');
   const contentEntries = [];
-  
-  if (!fs.existsSync(contentPath)) {
-    console.warn('Content folder not found!');
-    return contentEntries;
-  }
-  
-  // Recursively scan the content folder
-  function scanDir(dirPath, relativePath = '') {
-    const entries = fs.readdirSync(dirPath);
-    
+  const i18nConfig = siteConfig.internationalization;
+
+  // The scanDir function, now defined inside scanContentDirectory to capture contentEntries
+  // and to be callable for different base paths and languages.
+  // basePathForScan is the root path for the current scan (e.g., 'content/en' or 'content')
+  // currentLang is the language code for the content being scanned.
+  function scanDir(basePathForScan, currentLang, currentRelativePath = '') {
+    if (!fs.existsSync(basePathForScan)) {
+      console.warn(`Content folder not found for language ${currentLang}: ${basePathForScan}`);
+      return;
+    }
+
+    const entries = fs.readdirSync(path.join(basePathForScan, currentRelativePath));
+
     for (const entry of entries) {
-      const fullPath = path.join(dirPath, entry);
-      const entryRelativePath = path.join(relativePath, entry);
+      const itemPathInLangDir = path.join(currentRelativePath, entry); // Path relative to basePathForScan (e.g., blog/post.md)
+      const fullPath = path.join(basePathForScan, itemPathInLangDir); // Full system path
       const stats = fs.statSync(fullPath);
-      
+
       if (stats.isDirectory()) {
-        // If it's a folder, scan its contents
-        scanDir(fullPath, entryRelativePath);
+        scanDir(basePathForScan, currentLang, itemPathInLangDir);
       } else if (stats.isFile() && entry.endsWith('.md')) {
-        // Add markdown files to the list
         const slug = entry.replace('.md', '');
-        const url = relativePath 
-          ? `/${relativePath}/${slug}`.replace(/\\/g, '/') 
-          : `/${slug}`;
-          
+
+        // directoryPath is relative to the language folder (e.g., "blog" or "" for root)
+        const directoryPath = currentRelativePath.replace(/\\/g, '/');
+
+        const url = `/${directoryPath ? `${directoryPath}/` : ''}${slug}`;
+
         const content = fs.readFileSync(fullPath, 'utf-8');
         const { data, content: markdownContent } = matter(content);
         
-        // Process template variables (both in markdown content and metadata)
         const processedMarkdownContent = processTemplateVariables(markdownContent);
         const processedMetadata = {};
-        
-        // Process string values in metadata through template processing
         for (const [key, value] of Object.entries(data)) {
           if (typeof value === 'string') {
             processedMetadata[key] = processTemplateVariables(value);
@@ -69,7 +69,6 @@ const scanContentDirectory = () => {
           }
         }
         
-        // Add default values and process them through template processing
         const finalMetadata = {
           title: processedMetadata.title || formatTitle(slug),
           description: processedMetadata.description || '',
@@ -78,38 +77,42 @@ const scanContentDirectory = () => {
           ...processedMetadata
         };
         
-        // Parse markdown to HTML and then remove the first h1 heading
         const html = removeFirstH1(marked.parse(processedMarkdownContent));
         
-        // Fix directory - use full path
-        let directory = relativePath.replace(/\\/g, '/');
-        
-        // Add main directory information to create content tree
-        // Example: blog/categories/js -> blog
-        const mainDirectory = directory.split('/')[0] || 'root';
+        const mainDirectory = directoryPath.split('/')[0] || 'root';
         
         contentEntries.push({
           slug,
-          path: entryRelativePath,
-          url,
-          directory,
-          mainDirectory,
-          // Depth of the path
-          depth: directory === '' ? 0 : directory.split('/').length,
+          path: itemPathInLangDir.replace(/\\/g, '/'), // Path relative to language dir
+          url, // URL without language prefix
+          directory: directoryPath, // Directory relative to language dir
+          mainDirectory, // Main directory relative to language dir
+          depth: directoryPath === '' ? 0 : directoryPath.split('/').length,
           content: html,
-          metadata: finalMetadata
+          metadata: finalMetadata,
+          lang: currentLang // Add language information
         });
       }
     }
   }
-  
-  // Start scanning the content folder
-  scanDir(contentPath);
+
+  if (i18nConfig && i18nConfig.enabled) {
+    for (const lang of i18nConfig.languages) {
+      const langContentPath = path.resolve('content', lang);
+      scanDir(langContentPath, lang); // Initial relative path is ''
+    }
+  } else {
+    const defaultContentPath = path.resolve('content');
+    const defaultLang = i18nConfig ? i18nConfig.defaultLanguage : 'en'; // Fallback if i18n block is missing
+    scanDir(defaultContentPath, defaultLang); // Initial relative path is ''
+  }
   
   return contentEntries;
 };
 
 // Function that detects folders in the content directory
+// TODO: This function might need i18n adjustments later if used for navigation based on top-level folders.
+// For now, it still looks at the root 'content' folder.
 const getContentDirectories = () => {
   const contentPath = path.resolve('content');
   const directories = [];
@@ -163,37 +166,49 @@ const getAllContent = () => {
 };
 
 // Get content for a specific URL
-const getContentByUrl = (url) => {
-  const allContent = getAllContent();
-  
+const getContentByUrl = (url, lang = null) => {
+  let contentToSearch = getAllContent();
+  const i18nConfig = siteConfig.internationalization;
+
   // Remove trailing slash (/) from URL
   const normalizedUrl = url.endsWith('/') ? url.slice(0, -1) : url;
   
-  console.log('Normalized URL for lookup:', normalizedUrl);
+  let logMessage = `Normalized URL for lookup: "${normalizedUrl}"`;
+
+  if (i18nConfig && i18nConfig.enabled && lang) {
+    logMessage += `, Language filter: "${lang}"`;
+    contentToSearch = contentToSearch.filter(entry => entry.lang === lang);
+  }
+  console.log(logMessage);
   
   // Check content URLs and find matching content
-  const result = allContent.find(entry => {
+  const result = contentToSearch.find(entry => {
     // Remove trailing slash from content URL as well
     const entryUrl = entry.url.endsWith('/') ? entry.url.slice(0, -1) : entry.url;
-    console.log(`Comparing: "${entryUrl}" vs "${normalizedUrl}"`);
+    // console.log(`Comparing: "${entryUrl}" (lang: ${entry.lang}) vs "${normalizedUrl}"`); // More verbose logging
     return entryUrl === normalizedUrl;
   });
   
-  console.log('Match result:', result ? `Found: ${result.url}` : 'Not found');
+  console.log('Match result:', result ? `Found: ${result.url} (lang: ${result.lang})` : 'Not found');
   return result;
 };
 
 // Get content from a specific directory
-const getContentByDirectory = (directory) => {
-  const allContent = getAllContent();
+const getContentByDirectory = (directory, lang = null) => {
+  let contentToSearch = getAllContent();
+  const i18nConfig = siteConfig.internationalization;
+
+  if (i18nConfig && i18nConfig.enabled && lang) {
+    contentToSearch = contentToSearch.filter(entry => entry.lang === lang);
+  }
   
   // Direct matching for main directories
   if (directory === 'root') {
-    return allContent.filter(entry => entry.directory === 'root');
+    return contentToSearch.filter(entry => entry.directory === 'root' || entry.directory === ''); // entry.directory can be '' for root items
   }
   
   // Get all content that starts with the specified directory, including subdirectories
-  return allContent.filter(entry => {
+  return contentToSearch.filter(entry => {
     // 1. Exact match case (e.g., 'blog' directory for 'blog')
     // 2. Subdirectory match (e.g., 'blog/category' directory for 'blog')
     return entry.directory === directory || entry.directory.startsWith(directory + '/');
@@ -206,13 +221,21 @@ const clearContentCache = () => {
 };
 
 // Function to find subdirectories - returns subdirectories for a specific directory
-const getSubDirectories = (directory) => {
-  const allContent = getAllContent();
+const getSubDirectories = (directory, lang = null) => {
+  let contentToSearch = getAllContent();
+  const i18nConfig = siteConfig.internationalization;
+
+  if (i18nConfig && i18nConfig.enabled && lang) {
+    contentToSearch = contentToSearch.filter(entry => entry.lang === lang);
+  }
+
   const subdirs = new Set();
   
   // If not the main directory, filter relevant content
-  const contents = allContent.filter(entry => 
+  // Operate on contentToSearch
+  const contents = contentToSearch.filter(entry =>
     entry.directory !== 'root' && 
+    entry.directory !== '' && // Ensure we don't try to replace on root items if they slip through
     (entry.directory === directory || entry.directory.startsWith(directory + '/'))
   );
   
