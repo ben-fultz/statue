@@ -16,6 +16,8 @@
   let selectedIndex = -1;
   let searchInput;
   let searchContainer;
+  let searchTimeout;
+  let clickOutsideHandler;
 
   // Load search index on mount
   onMount(async () => {
@@ -26,12 +28,31 @@
           searchIndex = await response.json();
           console.log(`Search index loaded: ${searchIndex.totalItems} items`);
         } else {
-          console.warn('Search index not found');
+          console.warn('Search index not found - search functionality will be disabled');
+          searchIndex = { items: [] }; // Provide fallback
         }
       } catch (error) {
         console.error('Failed to load search index:', error);
+        searchIndex = { items: [] }; // Provide fallback
       }
     }
+
+    // Setup click outside handler
+    clickOutsideHandler = (event) => {
+      if (searchContainer && !searchContainer.contains(event.target)) {
+        closeSearch();
+      }
+    };
+
+    // Cleanup function
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+      if (clickOutsideHandler) {
+        document.removeEventListener('click', clickOutsideHandler);
+      }
+    };
   });
 
   // Simple fuzzy search implementation
@@ -85,22 +106,42 @@
       .slice(0, maxResults);
   }
 
-  // Handle search input
+  // Handle search input with proper debouncing
   function handleSearch() {
-    if (!searchIndex) {
+    if (!searchIndex || !searchIndex.items) {
       results = [];
+      return;
+    }
+
+    // Clear existing timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+
+    // Don't search if query is too short
+    if (query.length < minQueryLength) {
+      results = [];
+      isOpen = false;
+      isLoading = false;
       return;
     }
 
     isLoading = true;
     
     // Debounce search
-    setTimeout(() => {
-      results = fuzzySearch(query, searchIndex.items);
-      isOpen = query.length >= minQueryLength && results.length > 0;
-      selectedIndex = -1;
-      isLoading = false;
-    }, 150);
+    searchTimeout = setTimeout(() => {
+      try {
+        results = fuzzySearch(query, searchIndex.items);
+        isOpen = results.length > 0;
+        selectedIndex = -1;
+      } catch (error) {
+        console.error('Search error:', error);
+        results = [];
+        isOpen = false;
+      } finally {
+        isLoading = false;
+      }
+    }, 200);
   }
 
   // Handle keyboard navigation
@@ -119,7 +160,7 @@
       case 'Enter':
         event.preventDefault();
         if (selectedIndex >= 0 && results[selectedIndex]) {
-          window.location.href = results[selectedIndex].url;
+          navigateToResult(results[selectedIndex]);
         }
         break;
       case 'Escape':
@@ -135,10 +176,11 @@
     selectedIndex = -1;
   }
 
-  // Handle click outside to close
-  function handleClickOutside(event) {
-    if (searchContainer && !searchContainer.contains(event.target)) {
+  // Navigate to selected result
+  function navigateToResult(result) {
+    if (result && result.url) {
       closeSearch();
+      window.location.href = result.url;
     }
   }
 
@@ -154,16 +196,17 @@
     query = '';
     results = [];
     closeSearch();
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
   }
 
   // Reactive statements
-  $: if (query) handleSearch();
-  $: if (browser && searchContainer) {
-    if (isOpen) {
-      document.addEventListener('click', handleClickOutside);
-    } else {
-      document.removeEventListener('click', handleClickOutside);
-    }
+  $: if (query !== undefined) handleSearch();
+  $: if (browser && isOpen && clickOutsideHandler) {
+    document.addEventListener('click', clickOutsideHandler);
+  } else if (browser && !isOpen && clickOutsideHandler) {
+    document.removeEventListener('click', clickOutsideHandler);
   }
 
   // Format date for display
@@ -214,6 +257,10 @@
       class:has-results={isOpen}
       autocomplete="off"
       spellcheck="false"
+      aria-label="Search"
+      aria-expanded={isOpen}
+      aria-haspopup="listbox"
+      aria-activedescendant={selectedIndex >= 0 ? `search-result-${selectedIndex}` : null}
     />
     
     {#if query}
@@ -240,7 +287,7 @@
   </div>
   
   {#if isOpen && results.length > 0}
-    <div class="search-results" role="listbox">
+    <div class="search-results" role="listbox" aria-label="Search results">
       {#each results as result, index}
         <a 
           href={result.url}
@@ -248,7 +295,9 @@
           class:selected={index === selectedIndex}
           role="option"
           aria-selected={index === selectedIndex}
+          id="search-result-{index}"
           on:mouseenter={() => selectedIndex = index}
+          on:click|preventDefault={() => navigateToResult(result)}
         >
           <div class="result-header">
             <h3 class="result-title">

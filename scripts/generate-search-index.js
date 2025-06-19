@@ -17,6 +17,7 @@ import { getAllContent } from '../src/lib/cms/content-processor.js';
 const stripHtml = (html) => {
   return html
     .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/&[^;]+;/g, '') // Remove HTML entities
     .replace(/\s+/g, ' ') // Normalize whitespace
     .trim();
 };
@@ -33,6 +34,11 @@ const createExcerpt = (content, maxLength = 200) => {
   return lastSpace > 0 ? truncated.substring(0, lastSpace) + '...' : truncated + '...';
 };
 
+// Common stop words to filter out
+const STOP_WORDS = new Set([
+  'the', 'and', 'but', 'for', 'are', 'you', 'all', 'can', 'had', 'her', 'was', 'one', 'our', 'out', 'day', 'get', 'has', 'him', 'his', 'how', 'man', 'new', 'now', 'old', 'see', 'two', 'way', 'who', 'boy', 'did', 'its', 'let', 'put', 'say', 'she', 'too', 'use', 'with', 'have', 'this', 'will', 'your', 'from', 'they', 'know', 'want', 'been', 'good', 'much', 'some', 'time', 'very', 'when', 'come', 'here', 'just', 'like', 'long', 'make', 'many', 'over', 'such', 'take', 'than', 'them', 'well', 'were'
+]);
+
 // Function to extract keywords from content
 const extractKeywords = (title, description, content) => {
   const text = `${title} ${description} ${stripHtml(content)}`.toLowerCase();
@@ -44,7 +50,7 @@ const extractKeywords = (title, description, content) => {
       word.length > 2 && // Minimum length
       word.length < 20 && // Maximum length
       !/^\d+$/.test(word) && // Not just numbers
-      !['the', 'and', 'but', 'for', 'are', 'you', 'all', 'can', 'had', 'her', 'was', 'one', 'our', 'out', 'day', 'get', 'has', 'him', 'his', 'how', 'man', 'new', 'now', 'old', 'see', 'two', 'way', 'who', 'boy', 'did', 'its', 'let', 'put', 'say', 'she', 'too', 'use'].includes(word)
+      !STOP_WORDS.has(word) // Not a stop word
     );
   
   // Count frequency and return most common words
