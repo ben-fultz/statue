@@ -170,8 +170,8 @@ const generateSearchIndex = () => {
           date: entry.metadata.date || null,
           author: entry.metadata.author || null,
           keywords,
-          // For search scoring
-          searchText: `${entry.metadata.title} ${entry.metadata.description || ''} ${excerpt}`.toLowerCase()
+          // Combined text content for Fuse.js to search across
+          content: `${entry.metadata.title} ${entry.metadata.description || ''} ${excerpt} ${keywords.join(' ')}`
         };
         
         searchIndex.push(indexEntry);

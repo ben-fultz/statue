@@ -53,10 +53,10 @@
 		"chalk": "^5.4.1",
 		"commander": "^13.1.0",
 		"fs-extra": "^11.3.0",
+		"fuse.js": "^7.1.0",
 		"gray-matter": "^4.0.3",
 		"marked": "^15.0.7"
 	},
-	"peerDependencies": {},
 	"keywords": [
 		"static-site-generator",
 		"markdown",

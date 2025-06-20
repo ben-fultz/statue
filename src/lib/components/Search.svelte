@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { browser } from '$app/environment';
+  import Fuse from 'fuse.js';
 
   // Component props
   export let placeholder = 'Search posts and docs...';
@@ -11,6 +12,7 @@
   let query = '';
   let results = [];
   let searchIndex = null;
+  let fuse = null;
   let isLoading = false;
   let isOpen = false;
   let selectedIndex = -1;
@@ -19,6 +21,39 @@
   let searchTimeout;
   let clickOutsideHandler;
 
+  // Fuse.js configuration
+  const fuseOptions = {
+    keys: [
+      {
+        name: 'title',
+        weight: 0.6
+      },
+      {
+        name: 'description',
+        weight: 0.3
+      },
+      {
+        name: 'excerpt',
+        weight: 0.2
+      },
+      {
+        name: 'keywords',
+        weight: 0.4
+      },
+      {
+        name: 'content',
+        weight: 0.1
+      }
+    ],
+    threshold: 0.3, // Lower threshold = more strict matching
+    distance: 100,
+    includeScore: true,
+    includeMatches: true,
+    minMatchCharLength: 2,
+    ignoreLocation: true,
+    useExtendedSearch: false
+  };
+
   // Load search index on mount
   onMount(async () => {
     if (browser) {
@@ -26,14 +61,18 @@
         const response = await fetch('/search-index.json');
         if (response.ok) {
           searchIndex = await response.json();
+          // Initialize Fuse.js with the search data
+          fuse = new Fuse(searchIndex.items, fuseOptions);
           console.log(`Search index loaded: ${searchIndex.totalItems} items`);
         } else {
           console.warn('Search index not found - search functionality will be disabled');
-          searchIndex = { items: [] }; // Provide fallback
+          searchIndex = { items: [] };
+          fuse = new Fuse([], fuseOptions);
         }
       } catch (error) {
         console.error('Failed to load search index:', error);
-        searchIndex = { items: [] }; // Provide fallback
+        searchIndex = { items: [] };
+        fuse = new Fuse([], fuseOptions);
       }
     }
 
@@ -55,60 +94,25 @@
     };
   });
 
-  // Simple fuzzy search implementation
-  function fuzzySearch(searchQuery, items) {
-    if (!searchQuery || searchQuery.length < minQueryLength) {
+  // Fuse.js search implementation
+  function performSearch(searchQuery) {
+    if (!searchQuery || searchQuery.length < minQueryLength || !fuse) {
       return [];
     }
 
-    const query = searchQuery.toLowerCase().trim();
-    const words = query.split(/\s+/);
-
-    return items
-      .map(item => {
-        let score = 0;
-        const searchText = item.searchText;
-        const title = item.title.toLowerCase();
-        const description = item.description.toLowerCase();
-
-        // Exact title match gets highest score
-        if (title.includes(query)) {
-          score += 100;
-        }
-
-        // Title word matches
-        words.forEach(word => {
-          if (title.includes(word)) {
-            score += 50;
-          }
-          if (description.includes(word)) {
-            score += 30;
-          }
-          if (searchText.includes(word)) {
-            score += 10;
-          }
-        });
-
-        // Boost for keyword matches
-        words.forEach(word => {
-          if (item.keywords && item.keywords.includes(word)) {
-            score += 40;
-          }
-        });
-
-        // Penalty for longer content (prefer more relevant matches)
-        score -= Math.floor(searchText.length / 1000);
-
-        return { ...item, score };
-      })
-      .filter(item => item.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, maxResults);
+    const fuseResults = fuse.search(searchQuery, { limit: maxResults });
+    
+    // Transform Fuse.js results to match our expected format
+    return fuseResults.map(result => ({
+      ...result.item,
+      score: result.score,
+      matches: result.matches
+    }));
   }
 
   // Handle search input with proper debouncing
   function handleSearch() {
-    if (!searchIndex || !searchIndex.items) {
+    if (!fuse) {
       results = [];
       return;
     }
@@ -131,7 +135,7 @@
     // Debounce search
     searchTimeout = setTimeout(() => {
       try {
-        results = fuzzySearch(query, searchIndex.items);
+        results = performSearch(query);
         isOpen = results.length > 0;
         selectedIndex = -1;
       } catch (error) {
@@ -219,10 +223,36 @@
     });
   }
 
-  // Highlight search terms in text
-  function highlightSearchTerms(text, searchQuery) {
+  // Highlight search terms in text using Fuse.js matches
+  function highlightSearchTerms(text, searchQuery, matches = []) {
     if (!searchQuery || !text) return text;
     
+    // If we have Fuse.js matches, use those for more accurate highlighting
+    if (matches && matches.length > 0) {
+      let highlighted = text;
+      const matchedTerms = new Set();
+      
+      matches.forEach(match => {
+        if (match.indices && match.indices.length > 0) {
+          match.indices.forEach(([start, end]) => {
+            const matchedText = text.substring(start, end + 1);
+            if (matchedText.length > 1) {
+              matchedTerms.add(matchedText.toLowerCase());
+            }
+          });
+        }
+      });
+      
+      // Highlight the matched terms
+      matchedTerms.forEach(term => {
+        const regex = new RegExp(`(${term})`, 'gi');
+        highlighted = highlighted.replace(regex, '<mark>$1</mark>');
+      });
+      
+      return highlighted;
+    }
+    
+    // Fallback to simple word-based highlighting
     const words = searchQuery.toLowerCase().split(/\s+/);
     let highlighted = text;
     
@@ -301,7 +331,7 @@
         >
           <div class="result-header">
             <h3 class="result-title">
-              {@html highlightSearchTerms(result.title, query)}
+              {@html highlightSearchTerms(result.title, query, result.matches?.filter(m => m.key === 'title'))}
             </h3>
             <span class="result-category category-{result.category}">
               {result.category}
@@ -310,12 +340,12 @@
           
           {#if result.description}
             <p class="result-description">
-              {@html highlightSearchTerms(result.description, query)}
+              {@html highlightSearchTerms(result.description, query, result.matches?.filter(m => m.key === 'description'))}
             </p>
           {/if}
           
           <p class="result-excerpt">
-            {@html highlightSearchTerms(result.excerpt, query)}
+            {@html highlightSearchTerms(result.excerpt, query, result.matches?.filter(m => m.key === 'excerpt'))}
           </p>
           
           <div class="result-meta">

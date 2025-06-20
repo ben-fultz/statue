@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generated": "2025-06-11T23:05:02.471Z",
+  "generated": "2025-06-20T19:10:48.097Z",
   "totalItems": 13,
   "items": [
     {
@@ -22,9 +22,9 @@
         "first",
         "blog",
         "post",
-        "this"
+        "that"
       ],
-      "searchText": "hello world our first blog post welcome to our first blog post. this is a sample markdown file that will be converted to html and displayed on our site. markdown features markdown is a lightweight markup language that allows you to..."
+      "content": "Hello World Our first blog post Welcome to our first blog post. This is a sample markdown file that will be converted to HTML and displayed on our site. Markdown Features Markdown is a lightweight markup language that allows you to... using markdown text created hello world first blog post that"
     },
     {
       "id": "blog-post1",
@@ -43,11 +43,11 @@
         "created",
         "first",
         "blog",
-        "this",
         "that",
-        "html"
+        "html",
+        "site"
       ],
-      "searchText": "post 1 our first blog post welcome to our first blog post. this is a sample markdown file that will be converted to html and displayed on our site. markdown features markdown is a lightweight markup language that allows you to..."
+      "content": "POST 1 Our first blog post Welcome to our first blog post. This is a sample markdown file that will be converted to HTML and displayed on our site. Markdown Features Markdown is a lightweight markup language that allows you to... using post markdown text created first blog that html site"
     },
     {
       "id": "blog-post10",
@@ -66,11 +66,11 @@
         "created",
         "first",
         "blog",
-        "this",
         "that",
-        "html"
+        "html",
+        "site"
       ],
-      "searchText": "post 10 our first blog post welcome to our first blog post. this is a sample markdown file that will be converted to html and displayed on our site. markdown features markdown is a lightweight markup language that allows you to..."
+      "content": "POST 10 Our first blog post Welcome to our first blog post. This is a sample markdown file that will be converted to HTML and displayed on our site. Markdown Features Markdown is a lightweight markup language that allows you to... using post markdown text created first blog that html site"
     },
     {
       "id": "blog-post2",
@@ -89,11 +89,11 @@
         "created",
         "first",
         "blog",
-        "this",
         "that",
-        "html"
+        "html",
+        "site"
       ],
-      "searchText": "post 2 our first blog post welcome to our first blog post. this is a sample markdown file that will be converted to html and displayed on our site. markdown features markdown is a lightweight markup language that allows you to..."
+      "content": "POST 2 Our first blog post Welcome to our first blog post. This is a sample markdown file that will be converted to HTML and displayed on our site. Markdown Features Markdown is a lightweight markup language that allows you to... using post markdown text created first blog that html site"
     },
     {
       "id": "blog-post3",
@@ -112,11 +112,11 @@
         "created",
         "first",
         "blog",
-        "this",
         "that",
-        "html"
+        "html",
+        "site"
       ],
-      "searchText": "post 3 our first blog post welcome to our first blog post. this is a sample markdown file that will be converted to html and displayed on our site. markdown features markdown is a lightweight markup language that allows you to..."
+      "content": "POST 3 Our first blog post Welcome to our first blog post. This is a sample markdown file that will be converted to HTML and displayed on our site. Markdown Features Markdown is a lightweight markup language that allows you to... using post markdown text created first blog that html site"
     },
     {
       "id": "blog-post4",
@@ -135,11 +135,11 @@
         "created",
         "first",
         "blog",
-        "this",
         "that",
-        "html"
+        "html",
+        "site"
       ],
-      "searchText": "post 4 our first blog post welcome to our first blog post. this is a sample markdown file that will be converted to html and displayed on our site. markdown features markdown is a lightweight markup language that allows you to..."
+      "content": "POST 4 Our first blog post Welcome to our first blog post. This is a sample markdown file that will be converted to HTML and displayed on our site. Markdown Features Markdown is a lightweight markup language that allows you to... using post markdown text created first blog that html site"
     },
     {
       "id": "blog-post5",
@@ -158,11 +158,11 @@
         "created",
         "first",
         "blog",
-        "this",
         "that",
-        "html"
+        "html",
+        "site"
       ],
-      "searchText": "post 5 our first blog post welcome to our first blog post. this is a sample markdown file that will be converted to html and displayed on our site. markdown features markdown is a lightweight markup language that allows you to..."
+      "content": "POST 5 Our first blog post Welcome to our first blog post. This is a sample markdown file that will be converted to HTML and displayed on our site. Markdown Features Markdown is a lightweight markup language that allows you to... using post markdown text created first blog that html site"
     },
     {
       "id": "blog-post6",
@@ -181,11 +181,11 @@
         "created",
         "first",
         "blog",
-        "this",
         "that",
-        "html"
+        "html",
+        "site"
       ],
-      "searchText": "post 6 our first blog post welcome to our first blog post. this is a sample markdown file that will be converted to html and displayed on our site. markdown features markdown is a lightweight markup language that allows you to..."
+      "content": "POST 6 Our first blog post Welcome to our first blog post. This is a sample markdown file that will be converted to HTML and displayed on our site. Markdown Features Markdown is a lightweight markup language that allows you to... using post markdown text created first blog that html site"
     },
     {
       "id": "blog-post7",
@@ -204,11 +204,11 @@
         "created",
         "first",
         "blog",
-        "this",
         "that",
-        "html"
+        "html",
+        "site"
       ],
-      "searchText": "post 7 our first blog post welcome to our first blog post. this is a sample markdown file that will be converted to html and displayed on our site. markdown features markdown is a lightweight markup language that allows you to..."
+      "content": "POST 7 Our first blog post Welcome to our first blog post. This is a sample markdown file that will be converted to HTML and displayed on our site. Markdown Features Markdown is a lightweight markup language that allows you to... using post markdown text created first blog that html site"
     },
     {
       "id": "blog-post8",
@@ -227,11 +227,11 @@
         "created",
         "first",
         "blog",
-        "this",
         "that",
-        "html"
+        "html",
+        "site"
       ],
-      "searchText": "post 8 our first blog post welcome to our first blog post. this is a sample markdown file that will be converted to html and displayed on our site. markdown features markdown is a lightweight markup language that allows you to..."
+      "content": "POST 8 Our first blog post Welcome to our first blog post. This is a sample markdown file that will be converted to HTML and displayed on our site. Markdown Features Markdown is a lightweight markup language that allows you to... using post markdown text created first blog that html site"
     },
     {
       "id": "blog-post9",
@@ -250,11 +250,11 @@
         "created",
         "first",
         "blog",
-        "this",
         "that",
-        "html"
+        "html",
+        "site"
       ],
-      "searchText": "post 9 our first blog post welcome to our first blog post. this is a sample markdown file that will be converted to html and displayed on our site. markdown features markdown is a lightweight markup language that allows you to..."
+      "content": "POST 9 Our first blog post Welcome to our first blog post. This is a sample markdown file that will be converted to HTML and displayed on our site. Markdown Features Markdown is a lightweight markup language that allows you to... using post markdown text created first blog that html site"
     },
     {
       "id": "blog-truth",
@@ -273,11 +273,11 @@
         "question",
         "language",
         "not",
-        "&quot",
-        "just",
-        "approach"
+        "approach",
+        "modeling",
+        "these"
       ],
-      "searchText": "truth - a new paradigm in ai philosophy exploring how truth is revolutionizing our approach to philosophical questions through advanced language modeling since time immemorial, man has pondered these question. many a great thinker has stared into the abyss and lost themselves in an episemic spiral. questions are answered by bigger, harder questions...."
+      "content": "TRUTH - A New Paradigm in AI Philosophy Exploring how TRUTH is revolutionizing our approach to philosophical questions through advanced language modeling Since time immemorial, man has pondered these question. Many a great thinker has stared into the abyss and lost themselves in an episemic spiral. Questions are answered by bigger, harder questions.... truth questions that philosophical question language not approach modeling these"
     },
     {
       "id": "docs-getting-started",
@@ -289,18 +289,59 @@
       "date": null,
       "author": null,
       "keywords": [
-        "with",
         "started",
-        "your",
         "development",
         "npm",
         "git",
         "platform",
         "begin",
         "following",
-        "clone"
+        "clone",
+        "install",
+        "project"
       ],
-      "searchText": "getting started learn how to get started with our platform this guide will help you get started with our platform. follow these simple steps to set up your environment and begin development. prerequisites before you begin, make sure you have the following..."
+      "content": "Getting Started Learn how to get started with our platform This guide will help you get started with our platform. Follow these simple steps to set up your environment and begin development. Prerequisites Before you begin, make sure you have the following... started development npm git platform begin following clone install project"
     }
-  ]
+  ],
+  "metadata": {
+    "blog-hello-world": {
+      "hash": "d21da0858c3f72363225eea443fa482c"
+    },
+    "blog-post1": {
+      "hash": "49a2d620f2fe0d9ebe89622231da2172"
+    },
+    "blog-post10": {
+      "hash": "a68d4ed8c8130c8760ac6b683bac3855"
+    },
+    "blog-post2": {
+      "hash": "fb085f1bc7dd0fb5d4d2794f9da2a4e3"
+    },
+    "blog-post3": {
+      "hash": "8c1e2f92ef6d0c7cfc786d8a7f2ddf38"
+    },
+    "blog-post4": {
+      "hash": "eee60c8c9e5cf5352314bc9fdde5f5f0"
+    },
+    "blog-post5": {
+      "hash": "70a3a64468d8135aefcaff4e6fbb956a"
+    },
+    "blog-post6": {
+      "hash": "812a0404fa6e4ad6e944ea620374f7f7"
+    },
+    "blog-post7": {
+      "hash": "7f5a197aca40a6b58142d5d928002562"
+    },
+    "blog-post8": {
+      "hash": "64b8155e572eed23bf1416a84ee0c6be"
+    },
+    "blog-post9": {
+      "hash": "e9d753270b3729cd14004de0a105b301"
+    },
+    "blog-truth": {
+      "hash": "bb36a98e69134d3e6bd373b7f773c48d"
+    },
+    "docs-getting-started": {
+      "hash": "16c7dbc2e2a5b67c27285218c02240b7"
+    }
+  }
 }
