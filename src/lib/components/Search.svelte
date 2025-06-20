@@ -236,7 +236,7 @@
         if (match.indices && match.indices.length > 0) {
           match.indices.forEach(([start, end]) => {
             const matchedText = text.substring(start, end + 1);
-            if (matchedText.length > 1) {
+            if (matchedText.length > 2) {
               matchedTerms.add(matchedText.toLowerCase());
             }
           });
