@@ -288,7 +288,6 @@
       autocomplete="off"
       spellcheck="false"
       aria-label="Search"
-      aria-expanded={isOpen}
       aria-haspopup="listbox"
       aria-activedescendant={selectedIndex >= 0 ? `search-result-${selectedIndex}` : null}
     />
